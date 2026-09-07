@@ -174,7 +174,12 @@ function searchInSignbankAndCollect($conn, $senseOrGlosID, $isSense = true) {
     }
 
     // Look for the glosID in the Signbank JSON file
-    $signbankJson = "../glosses_transformed.json";
+    // The Signbank dump lives in the connector's own directory, which is where
+    // it is rebuilt - /web is not writable by the web server, so the file that
+    // has to be replaced atomically cannot live at the docroot root. The old
+    // location is still honoured for a host that predates the connector.
+    $signbankJson = '/web/signbank_data/glosses_transformed.json';
+    if (!is_readable($signbankJson)) $signbankJson = '/web/glosses_transformed.json';
     $signbank = json_decode(file_get_contents($signbankJson), true);
 
     foreach ($signbank as $entry) {
