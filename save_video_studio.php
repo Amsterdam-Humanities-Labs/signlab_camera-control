@@ -1,4 +1,9 @@
 <?php
+
+// signcollect-lib's install-root resolver: sc_path(), sc_dir(), sc_root().
+// Vendored shim - it finds /web/lib/paths.php, or falls back to /web.
+require_once __DIR__ . '/sc_paths.php';
+
 require_once __DIR__ . '/db.php';
 $conn = getConnection();
 
@@ -62,7 +67,7 @@ if ($row) {
 }
 
 if ($skipped !== "true" && isset($_FILES['video'])) {
-    $upload_directory = '/web/uploads/';
+    $upload_directory = sc_dir('uploads');
     $video_filename = $randomString;
     $video_path = $upload_directory . $video_filename;
 
