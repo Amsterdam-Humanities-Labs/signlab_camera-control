@@ -11,7 +11,35 @@
  *   jsonResponse($rows);
  */
 
-include(__DIR__ . '/mysql_config.php');
+// Credentials. In order of preference:
+//
+//   1. a local mysql_config.php, if this host still has one - existing hosts
+//      keep behaving exactly as they did;
+//   2. signcollect-lib's compat shim, which sets the same four globals from
+//      /web/.env. ../lib is the deployed layout (/web/studio_beta -> /web/lib);
+//      the absolute path covers a checkout that sits somewhere else.
+//
+// Until now it was (1) or nothing, and mysql_config.php is gitignored, so a
+// fresh checkout had no credential file at all: every endpoint that includes
+// this file - zin/getSenses.php among them - returned 500 before it read the
+// request. The library is what makes a clone deployable without someone
+// remembering to hand-place a file.
+$sb_config = null;
+foreach ([__DIR__ . '/mysql_config.php',
+          __DIR__ . '/../lib/compat/mysql_config.php',
+          '/web/lib/compat/mysql_config.php'] as $sb_candidate) {
+    if (is_file($sb_candidate)) {
+        $sb_config = $sb_candidate;
+        break;
+    }
+}
+if ($sb_config === null) {
+    error_log('studio_beta/db.php: no mysql_config.php and no signcollect-lib at ../lib or /web/lib');
+    http_response_code(500);
+    die('Configuration error: the database configuration is missing.');
+}
+include($sb_config);
+unset($sb_config, $sb_candidate);
 
 /**
  * Create and return a mysqli connection.
