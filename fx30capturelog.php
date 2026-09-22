@@ -7,6 +7,9 @@
 //
 // Body: {"time":"<iso8601>","clips":{"<serial>":"<clipName>.MP4", ...}}
 
+// Login required: this reaches the studio cameras / controller Mac.
+require_once __DIR__ . '/require_login.php';
+
 $SSH_TARGET = 'signlab@100.66.221.75';
 $SSH_KEY = '/home/gomer/.ssh/id_ed25519'; // moet leesbaar zijn voor de webserver-user
 $LOG_DIR = '/Users/signlab/Sony-SDK-MACOS-API/pyqtController/capture_logs';

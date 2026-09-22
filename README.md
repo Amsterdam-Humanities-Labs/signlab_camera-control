@@ -8,8 +8,8 @@ Camera API: see [`AGENT_API_GUIDE.md`](AGENT_API_GUIDE.md) before touching anyth
 
 | File | Does |
 |---|---|
-| `fx30proxy.php` | same-origin proxy to the controller's `/api/*` (it sends no CORS headers); `?host=` override |
-| `fx30capturelog.php` | expected clip names to `logs/capture_clips/{date}.json` and, over ssh, the controller Mac's `capture_logs/` |
+| `fx30proxy.php` | same-origin proxy to the controller's `/api/*` (it sends no CORS headers); `?host=` override; login required (`require_login.php`) |
+| `fx30capturelog.php` | (login required) expected clip names to `logs/capture_clips/{date}.json` and, over ssh, the controller Mac's `capture_logs/` |
 | `fx30debuglog.php` | browser/controller events to `logs/fx30_debug.log`; off with `?fxdebug=0` |
 | `save_video_studio.php` | persist a take: `CameraRecords` insert, `form_data.videoTop`, webcam blob to `uploads/` |
 | `fetch_last_capture.php` | today's `studio_data` row: per-camera counters and flags |
