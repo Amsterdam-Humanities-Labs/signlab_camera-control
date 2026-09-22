@@ -7,6 +7,9 @@
 // Gebruik: fx30proxy.php?path=/api/status[&host=192.168.1.50:8080][&timeout=30]
 // POST requests worden met body doorgestuurd.
 
+// Login required: this reaches the studio cameras / controller Mac.
+require_once __DIR__ . '/require_login.php';
+
 $DEFAULT_HOST = 'signlabs-mini.taila8bdbd.ts.net:8080'; // controller-Mac (signlab, Tailscale)
 
 $host = isset($_GET['host']) && $_GET['host'] !== '' ? $_GET['host'] : $DEFAULT_HOST;
