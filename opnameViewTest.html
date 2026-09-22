@@ -1227,7 +1227,7 @@ function selectType(type) {
     //and thema from fetch_all_glosses.php when selected on glos
 
     if(type == "Glos") {
-        fetch('uniqueThema.php')
+        fetch('lookups.php?what=thema')
         .then(response => response.json())
         .then(data => {
           
@@ -1249,7 +1249,7 @@ function selectType(type) {
         .catch(error => console.error('Error fetching thema data:', error));
     }
     if(type == "Extern") {
-        fetch('uniqueThema.php?extern=1')
+        fetch('lookups.php?what=thema&extern=1')
         .then(response => response.json())
         .then(data => {
           
@@ -1300,7 +1300,7 @@ function selectType(type) {
         });
     }
     if(type == "nmm") {
-        fetch(`nmm/fetch_themas.php`)
+        fetch('lookups.php?what=nmm_themas')
         .then(response => response.json())
         .then(data => {
             const select = document.getElementById('selectThemaMenu');
@@ -1343,7 +1343,7 @@ if(type == "Tekst") {
 
       
       $.ajax({
-        url: 'hh/api.php',
+        url: '/hh/api.php',
         method: 'GET',
         data: {
           action: 'content_extended',
@@ -1385,7 +1385,7 @@ if(type == "Labels") {
   const select = document.getElementById('selectThemaMenu');
 
   $.ajax({
-    url: 'uniqueLabels.php',
+    url: 'lookups.php?what=labels',
     method: 'GET',
     success: function(response) {
       // Assuming the response is a JSON array like:
@@ -3065,7 +3065,7 @@ function fetchTekstData(userId, textId) {
   
 
 
-  fetch("hh/api.php?action=get_content_ngt_text_extended&id=" + textId)
+  fetch("/hh/api.php?action=get_content_ngt_text_extended&id=" + textId)
         .then(response => response.json())
         .then(data => {
             let stopLoop = false;
@@ -4012,7 +4012,7 @@ async function forceCameraReconnect() {
     }
   }
 
-  fetch('fetch_data.php', {
+  fetch('lookups.php?what=users', {
     method: 'GET',
   }).then(response => response.json())
     .then(data => {
