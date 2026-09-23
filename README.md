@@ -5,7 +5,8 @@ Camera Control: the page an operator keeps open during an FX30 recording session
 The entry point is `opnameView.html`; there is no `index.html`. The old name `opnameViewTest.html` redirects to it.
 The operator picks what to record: a gloss, a sentence (`zin`), `nmm`, an `hh` text or a label set.
 The page shows and starts all five cameras through the `fx30MultiRecord` controller, logs each take and lists the day's takes.
-Read [`AGENT_API_GUIDE.md`](AGENT_API_GUIDE.md) before you change anything `fx30*`.
+The controller (`fx30MultiRecord`, in [signlab_Sony-SDK-MACOS-API](https://github.com/Amsterdam-Humanities-Labs/signlab_Sony-SDK-MACOS-API)) is shared with the PyQt app: never start or restart it, and wait while `/api/status` shows `scanning`, `downloading` or `listing` (cameras disappear then; that is normal).
+Commands are broadcast to all cameras; drive Start/Stop from the polled `recording` state, and log expected clip names before `/api/start` (`fx30capturelog.php`).
 
 | File | Does |
 |---|---|

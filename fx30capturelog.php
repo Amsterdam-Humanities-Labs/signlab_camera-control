@@ -1,6 +1,6 @@
 <?php
 // fx30capturelog.php — schrijft een capture-log entry naar de controller-Mac.
-// AGENT_API_GUIDE.md (coexistence regel 5): clients die opnames starten moeten
+// Afspraak met de PyQt-app (signlab_Sony-SDK-MACOS-API): clients die opnames starten moeten
 // de verwachte clipnamen (snapshot van clipName VOOR /api/start) toevoegen aan
 // pyqtController/capture_logs/{YYYY-MM-DD}.json — zelfde formaat als de
 // PyQt-app, anders zijn die opnames onzichtbaar voor de sync-verificatie.

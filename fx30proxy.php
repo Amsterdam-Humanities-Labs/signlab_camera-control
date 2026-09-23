@@ -1,6 +1,6 @@
 <?php
 // fx30proxy.php — same-origin proxy naar de fx30MultiRecord camera controller.
-// De controller (zie AGENT_API_GUIDE.md) stuurt geen CORS-headers, dus de
+// De controller stuurt geen CORS-headers, dus de
 // browser kan hem niet rechtstreeks op een ander apparaat aanroepen; alle
 // /api/* requests lopen via dit script.
 //
