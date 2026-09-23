@@ -1,4 +1,4 @@
-# signlab_studio_beta
+# signlab_camera-control
 Camera Control: the page an operator keeps open during an FX30 recording session.
 
 ## What it does
@@ -21,7 +21,7 @@ Commands are broadcast to all cameras; drive Start/Stop from the polled `recordi
 | `helpScripts/emptyVideoTop.php` | clears the recorded-take markers for a user and theme |
 | `zin/getRows.php`, `hh/get_begrippen.php` | sentences (with `videoTop`); the glossary of health terms |
 
-The health texts come from `/hh/api.php` ([signlab_hh](https://github.com/Amsterdam-Humanities-Labs/signlab_hh)) on the same origin. `db.php` is the shared DB helper.
+The health texts come from `/hh/api.php` ([signlab_patient-info](https://github.com/Amsterdam-Humanities-Labs/signlab_patient-info)) on the same origin. `db.php` is the shared DB helper.
 
 ## Where it runs
 Core server, `/web/studio_beta`, <https://signcollect.nl/studio_beta/opnameView.html>.
@@ -43,5 +43,5 @@ There is no build step. The stack deploys it through `interface_deploy/scripts/r
 ## Dependencies
 - `fx30MultiRecord` from [signlab_Sony-SDK-MACOS-API](https://github.com/Amsterdam-Humanities-Labs/signlab_Sony-SDK-MACOS-API), on port 8080 of the DRS, plus its PyQt app (`capture_logs/`).
 - MySQL `admin_gebarenoverleg`; [signlab_signcollect-lib](https://github.com/Amsterdam-Humanities-Labs/signlab_signcollect-lib) at `/web/lib`.
-- signlab_hh (`/hh/api.php`), and the portal session cookie through `/userProtect.js`.
+- signlab_patient-info (`/hh/api.php`), and the portal session cookie through `/userProtect.js`.
 - Only `fx30proxy.php` and `fx30capturelog.php` check the login. The other PHP endpoints do not.
