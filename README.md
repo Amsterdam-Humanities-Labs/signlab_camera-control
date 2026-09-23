@@ -34,7 +34,7 @@ There is no build step. The stack deploys it through `interface_deploy/scripts/r
 [signlab_signcollect-stack](https://github.com/Amsterdam-Humanities-Labs/signlab_signcollect-stack).
 
 ## Configuration
-- DB credentials: `db.php` tries `./mysql_config.php`, then `../lib/compat/mysql_config.php`, then `/web/lib/compat/mysql_config.php`.
+- DB credentials: `db.php` tries `./mysql_config.php`, then `../lib/compat/mysql_config.php`, then `/web/lib/compat/mysql_config.php`. Template for the first: `mysql_config.example.php`.
 - `logs/` and `/web/uploads` must be writable by `www-data`.
 - `fx30capturelog.php` hardcodes the ssh target `signlab@100.66.221.75` and the key `/home/gomer/.ssh/id_ed25519`.
 - `fx30proxy.php` defaults to `signlabs-mini.taila8bdbd.ts.net:8080`. The page takes `?camhost=host:port` to override it.
