@@ -1,5 +1,5 @@
 <?php
-// Dropdown lookups for opnameViewTest.html, one endpoint instead of four.
+// Dropdown lookups for opnameView.html, one endpoint instead of four.
 //   ?what=thema[&extern=N]   distinct form_data themes, upper-cased (was uniqueThema.php)
 //   ?what=labels[&extern=N]  distinct labels with colour              (was uniqueLabels.php)
 //   ?what=users              userId + user                            (was fetch_data.php)
