@@ -2,7 +2,7 @@
 Camera Control: the page an operator keeps open during an FX30 recording session.
 
 ## What it does
-The entry point is `opnameViewTest.html`; there is no `index.html`.
+The entry point is `opnameView.html`; there is no `index.html`. The old name `opnameViewTest.html` redirects to it.
 The operator picks what to record: a gloss, a sentence (`zin`), `nmm`, an `hh` text or a label set.
 The page shows and starts all five cameras through the `fx30MultiRecord` controller, logs each take and lists the day's takes.
 Read [`AGENT_API_GUIDE.md`](AGENT_API_GUIDE.md) before you change anything `fx30*`.
@@ -16,14 +16,14 @@ Read [`AGENT_API_GUIDE.md`](AGENT_API_GUIDE.md) before you change anything `fx30
 | `fetch_last_capture.php` | today's `studio_data` row: counters and flags per camera |
 | `reviewToday.php` | today's (or `?date=`) `CameraRecords` |
 | `lookups.php?what=` | dropdowns: `thema`, `labels`, `users`, `nmm_themas` |
-| `fetch_all2.php`, `nmm/fetch_*.php` | gloss lists by theme, label or status; NMM lists |
+| `fetch_glosses.php`, `nmm/fetch_*.php` | gloss lists by theme, label or status; NMM lists |
 | `helpScripts/emptyVideoTop.php` | clears the recorded-take markers for a user and theme |
 | `zin/getRows.php`, `hh/get_begrippen.php` | sentences (with `videoTop`); the glossary of health terms |
 
 The health texts come from `/hh/api.php` ([signlab_hh](https://github.com/Amsterdam-Humanities-Labs/signlab_hh)) on the same origin. `db.php` is the shared DB helper.
 
 ## Where it runs
-Core server, `/web/studio_beta`, <https://signcollect.nl/studio_beta/opnameViewTest.html>.
+Core server, `/web/studio_beta`, <https://signcollect.nl/studio_beta/opnameView.html>.
 The camera controller runs on the DRS (the studio Mac with the FX30 cameras), reached over Tailscale. On demo hosts the camera panel stays empty.
 
 ## Status
