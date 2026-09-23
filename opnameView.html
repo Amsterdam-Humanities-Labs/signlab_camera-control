@@ -350,7 +350,6 @@
     #myVideo1, #myVideo2, #myVideo3 { display: none; }
     #bezigStoppen { z-index: 10000; }
     #listGlossesDiv { display: none; }
-    #CharucoBoardDiv { display: none; color: var(--text-primary); }
 
     /* === DARK MODALS === */
     .modal-backdrop { background-color: rgba(0,0,0,0.6) !important; }
@@ -502,7 +501,6 @@
   <!-- SIDEBAR -->
   <div id="sidebar">
     <h3>Camera</h3>
-    <button class="sidebar-btn" onclick="startCalibration()">Charuco Board Calibratie</button>
     <button class="sidebar-btn" onclick="openCheckSettings(true)">Camera Tabel (Probleemoplossing)</button>
     <button class="sidebar-btn" onclick="toggleLiveStreamPanel()">Live Streams Aan/Uit</button>
 
@@ -540,10 +538,6 @@
         <div id="signbankVideoDiv">
           <video id="signbankVideo" class="videoClass" controls muted loop src=""></video>
         </div>
-      </div>
-
-      <div id="CharucoBoardDiv">
-        Charuco board calibration in progress. Press B to start capturing.
       </div>
     </div>
 
@@ -635,7 +629,7 @@
     <div class="modal-dialog" style="max-width: 100%;">
       <div class="modal-content">
         <div class="container">
-          <h2>Let op, weinig geheugen of lage batterij! <br> Bij batterij wisselen, Charuco calibratie opnieuw!</h2>
+          <h2>Let op, weinig geheugen of lage batterij! </h2>
           <table id="tableContainer"></table>
         </div>
       </div>
@@ -684,8 +678,7 @@
           <h2>Welke thema wil je opnemen?</h2>
           <select class="form-select" aria-label="Select Menu" id="selectThemaMenu">          </select>
         </div>
-        <div class="modal-footer" style="justify-content:space-between;">
-          <button type="button" class="btn btn-secondary" onclick="startCalibration()">Calibratie Charuco Board</button>
+        <div class="modal-footer" style="justify-content:flex-end;">
           <button type="button" class="btn btn-primary" onclick="loadData()" style="padding:10px 40px;font-size:16px;">Beginnen</button>
         </div>
       </div>
@@ -1028,7 +1021,6 @@
 <script>
   const socketExt = new WebSocket('wss://signcollect.nl/cameraServer/');
   const audio = new Audio('high_pitch_sound_0_1_sec.wav');
-  let charucoCheck = 0;
   let selectedType;
  let theme;
  let tempOpnameCounter = 200;
@@ -1508,31 +1500,10 @@ function showFormatConfirmation(){
       .then(response => response.json())
       .then(data => {
         if (data.opnameCounter == 0) {
-          console.log("opnameCounter is 0", opnameCounter);
           opnameCounter = 0;
-          startCalibration();
         }
       });
     uploadAndFormat = 0;
-  }
-
-  function startCalibration() {
-    $("#officeVideo").hide();
-    $("#signbankVideo").hide();
-    $("#CharucoBoardDiv").show();
-    $("#selectUsers").modal('hide');
-    $("#CharucoBoardDiv").text("Formatteren is klaar. Start calibratie Charuco Board. Press B to start capturing.");
-
-
-
-    var today = new Date();
-    var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
-    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-    var dateTime = date + '_' + time;
-    glos = "calibration_" + dateTime;
-    glosId = "9999";
-    charucoCheck = 1;
-    checkAudioFile("9999");
   }
 
   function openOpnameView() {
@@ -1579,8 +1550,6 @@ function showFormatConfirmation(){
 
   window.onload = function () {
     enableCam();
-    $("#CharucoBoardDiv").hide();
-    
     // Check if download parameter is set and greater than 0
     if (downloadEnabled) {
       // If download is 1, close webcam modal after 5 seconds
@@ -2314,21 +2283,7 @@ function showFormatConfirmation(){
       $("#webcam").css("z-index", "1");
     }, 500);
 
-    if (charucoCheck == 1) {
-
-      $("#CharucoBoardDiv").text("Charuco board calibartion done, wait 5 secs!");
-      setTimeout(function () {
-        $("#selectUsers").modal('show');
-        $("#videoRow").show();
-        $("#CharucoBoardDiv").hide();
-        $("#officeVideo").show();
-    $("#signbankVideo").show();
-
-      }, 5000);
-      charucoCheck = 0;
-    } else {
-      showWebcamPreview(blob);
-    }
+    showWebcamPreview(blob);
 
 
     sendGlosId(glosId, selectedType);
@@ -3972,17 +3927,6 @@ async function forceCameraReconnect() {
       }).catch(function (error) {
           console.error('Error:', error);
         });
-
-      if (charucoCheck == 1) {
-        $("#videoRow").show();
-
-        $("#CharucoBoardDiv").html("Charuco board calibratie gereed!");
-        setTimeout(function () {
-          $("#selectUsers").modal('show');
-        }, 5000);
-      } else {
-        $("#CharucoBoardDiv").hide();
-      }
 
       chunks = [];
     };
