@@ -2928,10 +2928,10 @@ else
                     console.log(item);
                     if (glosId) {
                         if (item.id.toString() === glosId.toString()) {
-                            handleItem(item); 
+                            showItemToRecord(item); 
                         }
                     } else {
-                        handleItem(item);
+                        showItemToRecord(item);
                     }
                 });
             }
@@ -2960,7 +2960,7 @@ else
 
             if (glosId) {
                 if (item.id.toString() === glosId.toString()) {
-                    handleItem(item); 
+                    showItemToRecord(item); 
                     stopLoop = true;
                 }
             } else {
@@ -3002,12 +3002,12 @@ function fetchGlosData(userId, glosId, theme) {
               DataCache.rawData.forEach(item => {
                 if (stopLoop) return;
                 if (glosId) {
-                  if (item.id.toString() === glosId.toString()) { handleItem(item); stopLoop = true; }
+                  if (item.id.toString() === glosId.toString()) { showItemToRecord(item); stopLoop = true; }
                 } else {
                   let vT = safeParseArray(item.videoTop);
                   let vC = safeParseArray(item.videoCenter);
                   if (vT.length === 0 && vC.length === 0) {
-                    if (!hasNmeRecording(item.zelfopname)) { handleItem(item); stopLoop = true; }
+                    if (!hasNmeRecording(item.zelfopname)) { showItemToRecord(item); stopLoop = true; }
                   }
                 }
               });
@@ -3032,7 +3032,7 @@ function fetchGlosData(userId, glosId, theme) {
 
                         if (glosId) {
                             if (item.id.toString() === glosId.toString()) {
-                                handleItem(item);
+                                showItemToRecord(item);
                                 stopLoop = true;
                             }
                         } else {
@@ -3041,7 +3041,7 @@ function fetchGlosData(userId, glosId, theme) {
 
                             if (videoTop.length === 0 && videoCenter.length === 0) {
                                 if (!hasNmeRecording(item.zelfopname)) {
-                                    handleItem(item);
+                                    showItemToRecord(item);
                                     stopLoop = true;
                                 }
                             }
@@ -3108,9 +3108,9 @@ function fetchLabelData(userId, glosId, theme) {
     DataCache.rawData.forEach(item => {
       if (stopLoop) return;
       if (glosId) {
-        if (item.id.toString() === glosId.toString()) { handleItem(item); stopLoop = true; }
+        if (item.id.toString() === glosId.toString()) { showItemToRecord(item); stopLoop = true; }
       } else {
-        handleItem(item);
+        showItemToRecord(item);
       }
     });
     categorizeItems(DataCache.rawData);
@@ -3134,11 +3134,11 @@ function fetchLabelData(userId, glosId, theme) {
           // process each item here, for example:
           if (glosId) {
             if (item.id.toString() === glosId.toString()) {
-              handleItem(item);
+              showItemToRecord(item);
               stopLoop = true;
             }
           } else {
-            handleItem(item);
+            showItemToRecord(item);
           }
         });
         camerasReconnectStartupRunning = 0;
@@ -3170,7 +3170,7 @@ function fetchBegripData(userId, glosId) {
               if (!glosId) { // Assuming glosId parameter might be added later
                   const firstEmpty = responseData.data.find(item => !item.videoTop || item.videoTop.length === 0);
                   if (firstEmpty) {
-                      // handleItem(firstEmpty); // Assuming handleItem exists and is relevant
+                      // showItemToRecord(firstEmpty); // Assuming showItemToRecord exists and is relevant
                   } else {
                       // Handle case where all items have videoTop
                       console.log("All begrippen seem to be recorded.");
@@ -3213,7 +3213,7 @@ function fetchSentenceData(userId, glosId, theme) {
 
                 if (glosId) {
                     if (item.ID.toString() === glosId.toString()) {
-                        handleItem(item); 
+                        showItemToRecord(item); 
                         stopLoop = true;
                     }
                 } else {
@@ -3221,7 +3221,7 @@ function fetchSentenceData(userId, glosId, theme) {
                     // Retake thema counts as "still to record" even with old videos.
                     if (item.videos.length === 0 || item.thema === '_lorraine_retake') {
                       console.log(item)
-                        handleItem(item);
+                        showItemToRecord(item);
                         stopLoop = true;
                     }
                     
@@ -3242,7 +3242,7 @@ function fetchSentenceData(userId, glosId, theme) {
         .catch(error => console.error('Error:', error));
 }
 
-function handleItem(item) {
+function showItemToRecord(item) {
 
 console.log(item)
 
@@ -3380,7 +3380,7 @@ function nextCapture(glosId, direction = 1) {
     if (DataCache.loaded && DataCache.rawData) {
       const fullItem = DataCache.rawData.find(d => (d.id || d.ID).toString() === nextId.toString());
       if (fullItem) {
-        handleItem(fullItem);
+        showItemToRecord(fullItem);
         return;
       }
     }
@@ -3618,7 +3618,7 @@ function nextCapture(glosId, direction = 1) {
             if (nextItem) {
               if (DataCache.loaded && DataCache.rawData) {
                 const fullItem = DataCache.rawData.find(d => (d.id || d.ID).toString() === nextItem.id.toString());
-                if (fullItem) { handleItem(fullItem); return; }
+                if (fullItem) { showItemToRecord(fullItem); return; }
               }
               loadData(userId, nextItem.id);
             } else if (selectedType !== 'vrij_opnemen') {
