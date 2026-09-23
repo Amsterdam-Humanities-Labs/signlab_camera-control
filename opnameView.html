@@ -1858,7 +1858,7 @@ function showFormatConfirmation(){
   canvasElement.style.width = videoWidth;
   webcamElement.style.width = videoWidth;
 
-  // === FX30 CONTROLLER (fx30MultiRecord REST API, zie AGENT_API_GUIDE.md) ===
+  // === FX30 CONTROLLER (fx30MultiRecord REST API, zie signlab_Sony-SDK-MACOS-API simpleCli/app/fx30MultiRecord.cpp) ===
   // De controller draait op een ander apparaat en stuurt geen CORS-headers,
   // dus alle requests lopen via fx30proxy.php op deze server. Er is geen
   // websocket meer: GET /api/status wordt gepolld en de oude events
@@ -2582,7 +2582,7 @@ function showFormatConfirmation(){
 
 
   async function camerasReconnectStartup() {
-    const numIterations = 60; // een scan kan enkele minuten duren (AGENT_API_GUIDE.md)
+    const numIterations = 60; // een scan kan enkele minuten duren
     camerasReconnectStartupRunning = 1;
     let scanRequested = false;
     let resetRequested = false;
@@ -3740,7 +3740,7 @@ async function forceCameraReconnect() {
     currentTime = new Date().getTime();
     console.log("pressed");
 
-    // De controller weigert opnemen tijdens een scan, download of listing (AGENT_API_GUIDE.md)
+    // De controller weigert opnemen tijdens een scan, download of listing
     if (fx30Status && (fx30Status.scanning || fx30Status.downloading || fx30Status.listing)) {
       $("#bodyText").text(fx30Status.downloading ? "Downloaden bezig, opnemen kan niet..." : "Scan of bestandslijst bezig, even wachten...");
       return;
