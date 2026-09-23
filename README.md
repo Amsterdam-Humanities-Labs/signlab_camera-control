@@ -16,7 +16,7 @@ Read [`AGENT_API_GUIDE.md`](AGENT_API_GUIDE.md) before you change anything `fx30
 | `fetch_last_capture.php` | today's `studio_data` row: counters and flags per camera |
 | `reviewToday.php` | today's (or `?date=`) `CameraRecords` |
 | `lookups.php?what=` | dropdowns: `thema`, `labels`, `users`, `nmm_themas` |
-| `fetch_all2.php`, `nmm/fetch_*.php` | gloss lists by theme, label or status; NMM lists |
+| `fetch_glosses.php`, `nmm/fetch_*.php` | gloss lists by theme, label or status; NMM lists |
 | `helpScripts/emptyVideoTop.php` | clears the recorded-take markers for a user and theme |
 | `zin/getRows.php`, `hh/get_begrippen.php` | sentences (with `videoTop`); the glossary of health terms |
 

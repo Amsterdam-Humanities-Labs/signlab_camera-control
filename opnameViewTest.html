@@ -2989,11 +2989,11 @@ function fetchGlosData(userId, glosId, theme) {
 
             let url;
             if(theme == "ALLES"){
-                url = `fetch_all2.php?limit=10000&offset=0&handle=allGlossesStudio`;
+                url = `fetch_glosses.php?limit=10000&offset=0&handle=allGlossesStudio`;
             }
             else
             {
-                url = `fetch_all2.php?limit=2000&offset=0&thema=${theme}&handle=themaFilter&menu=false`;
+                url = `fetch_glosses.php?limit=2000&offset=0&thema=${theme}&handle=themaFilter&menu=false`;
             }
 
             // Check cache first
@@ -3117,7 +3117,7 @@ function fetchLabelData(userId, glosId, theme) {
     return;
   }
 
-    fetch("fetch_all2.php?limit=1000&label=" + theme)
+    fetch("fetch_glosses.php?limit=1000&label=" + theme)
       .then(response => response.json())
       .then(responseData => {
         // Store in cache
