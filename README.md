@@ -2,7 +2,7 @@
 Camera Control: the page an operator keeps open during an FX30 recording session.
 
 ## What it does
-The entry point is `opnameView.html`; there is no `index.html`. The old name `opnameViewTest.html` redirects to it.
+The entry point is `opnameView.html`; there is no `index.html`. `opnameLR.html` is the QR screen (see below). The old name `opnameViewTest.html` redirects to it.
 The operator picks what to record: a gloss, a sentence (`zin`), `nmm`, an `hh` text or a label set.
 The page shows and starts all five cameras through the `fx30MultiRecord` controller, logs each take and lists the day's takes.
 The controller (`fx30MultiRecord`, in [signlab_Sony-SDK-MACOS-API](https://github.com/Amsterdam-Humanities-Labs/signlab_Sony-SDK-MACOS-API)) is shared with the PyQt app: never start or restart it, and wait while `/api/status` shows `scanning`, `downloading` or `listing` (cameras disappear then; that is normal).
@@ -22,6 +22,18 @@ Commands are broadcast to all cameras; drive Start/Stop from the polled `recordi
 | `zin/getRows.php`, `hh/get_begrippen.php` | sentences (with `videoTop`); the glossary of health terms |
 
 The health texts come from `/hh/api.php` ([signlab_patient-info](https://github.com/Amsterdam-Humanities-Labs/signlab_patient-info)) on the same origin. `db.php` is the shared DB helper.
+
+## QR screen (`opnameLR.html`)
+The second screen in the studio, facing the cameras. It shows a full-screen QR code while a take records, so every camera films which gloss it is.
+The QR holds `[glosId, selectedType, "HH:MM:SS"]`. Camera Control's webcam reads it back (jsQR) to check that the screen works.
+The controller app (`pyqtController/fx30_controller.py` in signlab_Sony-SDK-MACOS-API) opens it full screen in a Chrome kiosk on the extended monitor ("QR-scherm openen"). The URL is `display_url` in that app's local `config.json`, not in git.
+On production the page is served from the web root, <https://signcollect.nl/opnameLR.html> (`/web/opnameLR.html`). From this repo it deploys to `/studio_beta/opnameLR.html`; the deploy adds an alias `/opnameLR.html` so the kiosk URL keeps working.
+
+It needs the `studioSupport` websocket server at `wss://signcollect.nl/studioSupport/` (node, port 3010, only on production in `/home/gomer/node_servers/studioSupport`, in no repo). Protocol, JSON:
+- Camera Control sends `{glosId, selectedType, status}`, status `hello`, `glos`, `start` or `stop`. The server keeps the latest and broadcasts it to all clients, and replays it to each new connection.
+- `start` shows the QR, `stop` hides it. On `glos` and `hello` the QR page answers `{glosId, callback: "callback"}`; the server broadcasts `{callback: "callback"}` and Camera Control closes its "waiting for QR screen" modal.
+
+The websocket URL is a literal, like the ones in `opnameView.html`; the demo deploy rewrites it with `rewrite-urls.sh`.
 
 ## Where it runs
 Core server, `/web/studio_beta`, <https://signcollect.nl/studio_beta/opnameView.html>.
