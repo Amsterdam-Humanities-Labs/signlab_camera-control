@@ -71,3 +71,10 @@ If `cameras.json` is missing, the page and `fetch_last_capture.php` use `cameras
 - MySQL `admin_gebarenoverleg`; [signlab_signcollect-lib](https://github.com/Amsterdam-Humanities-Labs/signlab_signcollect-lib) at `/web/lib`.
 - signlab_patient-info (`/hh/api.php`), and the portal session cookie through `/userProtect.js`.
 - Only `fx30proxy.php` and `fx30capturelog.php` check the login. The other PHP endpoints do not.
+
+## License and citation
+
+Apache License 2.0, copyright University of Amsterdam: see [LICENSE](LICENSE) and
+[NOTICE](NOTICE). You may use it, also commercially, as long as you credit
+Gomer Otterspeer / University of Amsterdam as the source. To cite it, use
+[CITATION.cff](CITATION.cff) (the *Cite this repository* button on GitHub) or the DOI [10.21942/uva.33980314](https://doi.org/10.21942/uva.33980314).
