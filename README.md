@@ -4,7 +4,7 @@ Camera Control: the page an operator keeps open during an FX30 recording session
 ## What it does
 The entry point is `opnameView.html`; there is no `index.html`. The old name `opnameViewTest.html` redirects to it.
 The operator picks what to record: a gloss, a sentence (`zin`), `nmm`, an `hh` text or a label set.
-The page shows and starts all five cameras through the `fx30MultiRecord` controller, logs each take and lists the day's takes.
+The page shows and starts the studio's cameras (five FX30s; see [Cameras](#cameras)) through the `fx30MultiRecord` controller, logs each take and lists the day's takes.
 The controller (`fx30MultiRecord`, in [signlab_Sony-SDK-MACOS-API](https://github.com/Amsterdam-Humanities-Labs/signlab_Sony-SDK-MACOS-API)) is shared with the PyQt app: never start or restart it, and wait while `/api/status` shows `scanning`, `downloading` or `listing` (cameras disappear then; that is normal).
 Commands are broadcast to all cameras; drive Start/Stop from the polled `recording` state, and log expected clip names before `/api/start` (`fx30capturelog.php`).
 
@@ -14,7 +14,7 @@ Commands are broadcast to all cameras; drive Start/Stop from the polled `recordi
 | `fx30capturelog.php` | needs a login. Writes expected clip names to `logs/capture_clips/{date}.json`, and over ssh to `capture_logs/` on the DRS |
 | `fx30debuglog.php` | browser and controller events to `logs/fx30_debug.log`. Turn off with `?fxdebug=0` |
 | `save_video_studio.php` | saves a take: inserts into `CameraRecords`, sets `form_data.videoTop`, stores the webcam blob in `uploads/` |
-| `fetch_last_capture.php` | today's `studio_data` row: counters and flags per camera |
+| `fetch_last_capture.php` | today's `studio_data` row: counters and flags per camera (serial → column from `cameras.json`) |
 | `reviewToday.php` | today's (or `?date=`) `CameraRecords` |
 | `lookups.php?what=` | dropdowns: `thema`, `labels`, `users`, `nmm_themas` |
 | `fetch_glosses.php`, `nmm/fetch_*.php` | gloss lists by theme, label or status; NMM lists |
@@ -39,6 +39,20 @@ There is no build step. The stack deploys it through `interface_deploy/scripts/r
 - `logs/` and `/web/uploads` must be writable by `www-data`.
 - `fx30capturelog.php` hardcodes the ssh target `signlab@100.66.221.75` and the key `/home/gomer/.ssh/id_ed25519`.
 - `fx30proxy.php` defaults to `signlabs-mini.taila8bdbd.ts.net:8080`. The page takes `?camhost=host:port` to override it.
+
+## Cameras
+The camera list is in `cameras.json` next to `opnameView.html`. It is not in git; copy `cameras.example.json` (the five FX30s of the studio) and edit it.
+If `cameras.json` is missing, the page and `fetch_last_capture.php` use `cameras.example.json`.
+
+```json
+{ "D4DA001EACEA": "camera1", "D4DA001EAC65": "camera2", "D4DA001EAD5C": "camera3" }
+```
+
+- Key: the camera's serial. Value: `camera1` to `camera5`, the columns in `CameraRecords` and `studio_data`. There is no room for a sixth camera.
+- The number of entries is the number of cameras that must be online. With fewer, the page shows a warning and asks before recording.
+- The page loads the file at start-up (`no-store`) and only then starts polling the controller. Reload the page after a change.
+- Finding a serial: the controller's `/api/status` lists each camera with `model` like `ILME-FX30 (D4DA001EC952)`; the serial is the part in brackets. With a login, open `fx30proxy.php?path=/api/status`.
+- The file is served publicly. Serials are not secret; put nothing else in it.
 
 ## Dependencies
 - `fx30MultiRecord` from [signlab_Sony-SDK-MACOS-API](https://github.com/Amsterdam-Humanities-Labs/signlab_Sony-SDK-MACOS-API), on port 8080 of the DRS, plus its PyQt app (`capture_logs/`).

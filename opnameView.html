@@ -473,7 +473,7 @@
     </div>
   </div>
 
-  <!-- WAARSCHUWING: niet alle cameras online (moet 5/5 zijn) -->
+  <!-- WAARSCHUWING: niet alle cameras online (zie cameras.json) -->
   <div id="cameraCountWarning"></div>
 
   <!-- BEVESTIGING: opnemen terwijl niet alle cameras online zijn -->
@@ -1032,18 +1032,36 @@ let blueTimer;
 var timenow;
 let debug;
 
-// === CONSTANTS ===
-const CAMERA_MAP = {
-  "D4DA001EACEA": { name: "camera1", videoId: "myVideo1" },
-  "D4DA001EAC65": { name: "camera2", videoId: "myVideo2" },
-  "D4DA001EAD5C": { name: "camera3", videoId: "myVideo3" },
-  "D4DA001ECB4B": { name: "camera4", videoId: null },
-  "D4DA001EC952": { name: "camera5", videoId: null },
-};
+// === CAMERA'S ===
+// serial -> { name } (camera1..camera5 = kolommen in CameraRecords/studio_data).
+// De lijst staat per studio in cameras.json naast deze pagina (niet in git);
+// ontbreekt die, dan cameras.example.json (de vijf FX30's van de studio).
+// Zelfde lijst in fetch_last_capture.php.
+const CAMERA_MAP = {};
 
-// Verwacht aantal cameras: ALLE moeten online zijn (5/5), niet alleen "alle
+// Verwacht aantal cameras: ALLE moeten online zijn, niet alleen "alle
 // gevonden cameras". Met minder dan dit ontbreekt er een opname-hoek.
-const EXPECTED_CAMERAS = Object.keys(CAMERA_MAP).length;
+// 0 = cameralijst niet geladen (dan geldt: niet alle cameras online).
+let EXPECTED_CAMERAS = 0;
+
+async function fetchCameraConfig() {
+  let response = await fetch('cameras.json', { cache: 'no-store' });
+  if (response.status === 404) {
+    console.warn('Geen cameras.json, cameras.example.json gebruikt');
+    response = await fetch('cameras.example.json', { cache: 'no-store' });
+  }
+  if (!response.ok) throw new Error('HTTP ' + response.status + ' voor ' + response.url);
+  return response.json();
+}
+
+// Alles wat CAMERA_MAP/EXPECTED_CAMERAS leest start pas na deze promise
+// (zie setInterval(pollFx30Status) hieronder).
+const camerasLoaded = fetchCameraConfig()
+  .then(config => {
+    Object.entries(config).forEach(([serial, name]) => { CAMERA_MAP[serial] = { name: name }; });
+    EXPECTED_CAMERAS = Object.keys(CAMERA_MAP).length;
+  })
+  .catch(error => console.error('Cameralijst niet geladen:', error));
 
 // === HELPERS ===
 function safeParseArray(str) {
@@ -1906,17 +1924,21 @@ function showFormatConfirmation(){
   let fx30RecordingObserved = false;
   let fx30RecordStartTime = 0;
   let lastClipSnapshot = null; // verwachte clipnamen van de huidige/laatste opname
-  let allCamerasOnline = false; // true zodra 5/5 cameras verbonden zijn
-  let missingCamerasOverride = false; // eenmalige toestemming om met <5 cameras op te nemen
+  let allCamerasOnline = false; // true zodra alle EXPECTED_CAMERAS verbonden zijn
+  let missingCamerasOverride = false; // eenmalige toestemming om met minder cameras op te nemen
 
   // Toon/verberg de waarschuwingsbanner "niet alle cameras online".
   // allCamerasOnline blokkeert ook het opnemen (zie de B-toets-handler),
   // zodat er niet doorgewerkt wordt terwijl er een camera ontbreekt.
   function updateCameraCountWarning(online, busy) {
-    allCamerasOnline = (online >= EXPECTED_CAMERAS);
+    allCamerasOnline = (EXPECTED_CAMERAS > 0 && online >= EXPECTED_CAMERAS);
     const banner = document.getElementById('cameraCountWarning');
-    // tijdens download/listing/scan verdwijnen cameras normaal: dan niet alarmeren
-    if (allCamerasOnline || busy) {
+    if (EXPECTED_CAMERAS == 0) {
+      banner.textContent = "LET OP: cameralijst (cameras.json) niet geladen! Herlaad de pagina.";
+      banner.classList.add('show');
+      $("#cameraText").addClass('warn');
+    } else if (allCamerasOnline || busy) {
+      // tijdens download/listing/scan verdwijnen cameras normaal: dan niet alarmeren
       banner.classList.remove('show');
       $("#cameraText").removeClass('warn');
     } else {
@@ -2034,14 +2056,14 @@ function showFormatConfirmation(){
     if (totalCameras == 0 && busy) {
       cameraTextStr = "Cameras tijdelijk offline (download/listing bezig)";
     } else {
-      // altijd afzetten tegen het VERWACHTE aantal (5), niet tegen het aantal
+      // altijd afzetten tegen het VERWACHTE aantal (EXPECTED_CAMERAS), niet tegen het aantal
       // gevonden cameras — anders ziet "3/3" er ten onrechte goed uit
       cameraTextStr = "Cameras online: " + online + "/" + EXPECTED_CAMERAS;
     }
     if (heatWarning) cameraTextStr += " | LET OP: CAMERA OVERVERHIT";
     $("#cameraText").text(cameraTextStr);
 
-    // Waarschuwen zodra niet alle 5 cameras online zijn (en er geen download/
+    // Waarschuwen zodra niet alle cameras online zijn (en er geen download/
     // listing/scan loopt die het tijdelijk verklaart). Banner + rode statustekst.
     updateCameraCountWarning(online, busy);
 
@@ -2090,7 +2112,8 @@ function showFormatConfirmation(){
       camerasReconnectStartup();
     }
   }
-  setInterval(pollFx30Status, 1500);
+  // pas pollen als de cameralijst er is (CAMERA_MAP/EXPECTED_CAMERAS)
+  camerasLoaded.then(() => setInterval(pollFx30Status, 1500));
 
   // voortgangsbalk in het download-modal, gevoed door de [n/totaal]-teller
   // die de controller in downloadStatus meestuurt
@@ -2559,19 +2582,19 @@ function showFormatConfirmation(){
           // door de PyQt-app) — normaal, dus niet scannen/resetten (guide regel 3)
           $("#bodyText").text(checkStatus.downloading ? "Download bezig, wachten..." : "Bestandslijst bezig, wachten...");
         } else if (cameraSuccess >= EXPECTED_CAMERAS) {
-          // pas klaar als ALLE 5 cameras online zijn (niet "alle gevonden")
+          // pas klaar als ALLE cameras online zijn (niet "alle gevonden")
           foundSuccess = true;
         } else if (!scanRequested) {
-          // minder dan 5: actief zoeken naar de ontbrekende camera('s)
+          // minder dan verwacht: actief zoeken naar de ontbrekende camera('s)
           $("#bodyText").text("Niet alle cameras gevonden, opnieuw zoeken...");
           await fx30Post('/api/scan');
           scanRequested = true;
         } else if (!resetRequested) {
-          // scan klaar maar nog steeds <5 -> volledige USB reset + rescan
+          // scan klaar maar nog steeds te weinig -> volledige USB reset + rescan
           await fx30Post('/api/reset');
           resetRequested = true;
         } else {
-          // scan én reset gedaan, nog steeds <5: doorgaan zodat de app bruikbaar
+          // scan én reset gedaan, nog steeds te weinig: doorgaan zodat de app bruikbaar
           // is, maar de waarschuwingsbanner + opname-bevestiging dekken het risico
           $("#bodyText").text("Let op: niet alle cameras online. Controleer de ontbrekende camera('s).");
           if (cameraSuccess > 0) foundSuccess = true;
@@ -2719,7 +2742,7 @@ $("#vrijOpnemenInput").on('keydown', function (e) {
   if (e.key === 'Enter') loadData();
 });
 
-// "Toch opnemen" met minder dan 5 cameras: eenmalige override, dan B opnieuw sturen
+// "Toch opnemen" met minder cameras dan verwacht: eenmalige override, dan B opnieuw sturen
 document.getElementById('missingCamerasConfirmBtn').addEventListener('click', function () {
   bootstrap.Modal.getOrCreateInstance(document.getElementById('missingCamerasModal')).hide();
   missingCamerasOverride = true;
@@ -3519,21 +3542,13 @@ function nextCapture(glosId, direction = 1) {
     if (event.key === 'o') {
       userId = $("#selectUsersMenu").val();
 
-      const cameraArray = {
-        "D4DA001EACEA": "camera1",
-        "D4DA001EAC65": "camera2",
-        "D4DA001EAD5C": "camera3",
-        "D4DA001ECB4B": "camera4",
-        "D4DA001EC952": "camera5",
-      };
-
       videoNumber = videoNumber++;
       var formData = new FormData();
 
       Object.entries(cameras).forEach(([key, value], index) => {
-        const cameraName = cameraArray[key];
-        if (cameraName) {
-          formData.append(cameraName, value["aantal_opnames"]);
+        const cam = CAMERA_MAP[key];
+        if (cam) {
+          formData.append(cam.name, value["aantal_opnames"]);
         }
       });
       let formId;
@@ -3706,7 +3721,7 @@ async function forceCameraReconnect() {
       $("#bodyText").text("Cameras nemen al op (extern gestart) — eerst extern stoppen.");
       return;
     }
-    // Niet alle 5 cameras online: bij een NIEUWE opname eerst bevestigen
+    // Niet alle cameras online: bij een NIEUWE opname eerst bevestigen
     // (override), zodat er niet per ongeluk een hoek gemist wordt.
     if (webcamCaptureActive == 0 && !allCamerasOnline && !missingCamerasOverride) {
       const online = (fx30Status && Array.isArray(fx30Status.cameras)) ? fx30Status.cameras.filter(c => c.connected).length : 0;

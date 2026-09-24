@@ -10,13 +10,12 @@ $status = getString('status');
 $cId = getString('cameraId');
 $format = getString('format');
 
-$cameraMap = [
-    "D4DA001EACEA" => "camera1",
-    "D4DA001EAC65" => "camera2",
-    "D4DA001EAD5C" => "camera3",
-    "D4DA001ECB4B" => "camera4",
-    "D4DA001EC952" => "camera5",
-];
+// serial -> kolom; zelfde lijst als opnameView.html (cameras.json, anders cameras.example.json)
+$cameraFile = file_exists(__DIR__ . '/cameras.json') ? __DIR__ . '/cameras.json' : __DIR__ . '/cameras.example.json';
+$cameraMap = json_decode((string) @file_get_contents($cameraFile), true);
+if (!is_array($cameraMap)) {
+    $cameraMap = [];
+}
 
 // Whitelist valid camera columns
 $validColumns = ['camera1', 'camera2', 'camera3', 'camera4', 'camera5'];
