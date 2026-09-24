@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>QR Code Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        #qrCodeContainer {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #qrCode {
+            width: 100%;
+            height: 100%;
+            max-width: 95vmin; /* 90% of the smaller side (viewport width/height) */
+            max-height: 95vmin;
+        }
+    </style>
+</head>
+<body>
+    <div id="qrCodeContainer">
+        <div id="qrCode"></div>
+    </div>
+
+    <script>
+        var ws;
+        var qrCodeContainer = document.getElementById('qrCodeContainer');
+        var qrCodeElement = document.getElementById('qrCode');
+        var glosId = '';
+        var qrcode = null; // To hold the QRCode instance
+        var qrCodeInterval = null; // Interval for updating the QR code every second
+
+        function connectWebSocket() {
+            ws = new WebSocket('wss://signcollect.nl/studioSupport/');
+            
+            ws.onopen = () => {
+                console.log('Connected to server.');
+            };
+
+            ws.onmessage = (event) => {
+                console.log('Received message:', event.data);
+                try {
+                    const data = JSON.parse(event.data);
+                    if (data.glosId && data.selectedType) {
+                        console.log('Received GlosId:', data.glosId);
+                        glosId = data.glosId;
+
+                        // Normalize selectedType to lowercase for case-insensitive comparison
+                        const selectedType = data.selectedType.toLowerCase();
+                        const status = data.status.toLowerCase();
+
+                        switch (status) {
+                            case 'start':
+                                console.log('Handling "start" selectedType');
+                                // Display the QR code container
+                                displayQRCode(true);
+
+                                // Clear any existing interval
+                                if (qrCodeInterval) {
+                                    clearInterval(qrCodeInterval);
+                                }
+
+                                // Start interval to regenerate QR code every second
+                                // qrCodeInterval = setInterval(() => {
+                                    const currentTime = new Date();
+                                    const currentTimeMs = currentTime.toTimeString().split(' ')[0];
+                                    const qrData = [glosId, selectedType, currentTimeMs];
+                                    console.log('Regenerating QR Code with data:', qrData);
+                                    generateQRCode(JSON.stringify(qrData));
+
+                                // }, 500);
+                                break;
+                            case 'stop':
+                                console.log('Handling "stop" selectedType');
+                                // Hide the QR code
+                                displayQRCode(false);
+
+                                // Clear the interval
+                                qrcode.clear(); // Clear the previous QR code
+                                qrcode.makeCode(""); // Generate the new QR code with the updated data
+
+                                break;
+                            case 'glos':
+                                console.log('Handling "glos" selectedType');
+                                // Send a callback with selectedType 'callback'
+                                sendCallback(glosId);
+                                break;
+                            case 'hello':
+                                sendCallback(glosId);
+                            default:
+                                // For other selectedType values, do not display the QR code
+                                console.log('Unhandled selectedType:', data.selectedType);
+                                break;
+                        }
+                    } else {
+                        console.error('Unexpected message format:', event.data);
+                    }
+                } catch (error) {
+                    console.error('Error parsing message:', error);
+                }
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+            };
+
+            ws.onclose = () => {
+                console.log('Disconnected from server. Attempting to reconnect...');
+                // Clear the interval
+                if (qrCodeInterval) {
+                    clearInterval(qrCodeInterval);
+                    qrCodeInterval = null;
+                }
+                setTimeout(connectWebSocket, 100);
+            };
+        }
+
+        function sendCallback(glosId) {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                const callbackData = {
+                    glosId: glosId,
+                    callback: 'callback'
+                };
+                ws.send(JSON.stringify(callbackData));
+                console.log('Sent callback:', callbackData);
+            } else {
+                console.error('WebSocket is not open. Cannot send callback.');
+            }
+        }
+
+        function generateQRCode(data) {
+            console.log('Generating QR Code with data:', data);
+
+            if (!data || typeof data !== 'string') {
+                console.error('Invalid data:', data);
+                return;
+            }
+
+            if (qrcode === null) {
+                console.log('Creating new QRCode instance');
+                // First time generating the QR code
+                qrcode = new QRCode(qrCodeElement, {
+                    text: data,
+                    width: qrCodeElement.offsetWidth,
+                    height: qrCodeElement.offsetWidth // Ensuring it's square by using the width
+                });
+            } else {
+                console.log('Clearing and regenerating QRCode');
+                // Regenerate the QR code on subsequent updates
+                qrcode.clear(); // Clear the previous QR code
+                qrcode.makeCode(data); // Generate the new QR code with the updated data
+            }
+        }
+
+        function displayQRCode(show) {
+            if (show) {
+                console.log('Displaying QR Code');
+            } else {
+                console.log('Hiding QR Code');
+                qrcode.clear(); // Clear the previous QR code
+            }
+            qrCodeContainer.style.display = show ? 'flex' : 'none';
+        }
+
+        // Connect WebSocket when the page loads
+        window.onload = () => {
+            // const qrData = ["test", "nmm"];
+            //                         console.log('Regenerating QR Code with data:', qrData);
+            //                         generateQRCode(JSON.stringify(qrData));
+            // displayQRCode(true);
+            connectWebSocket();
+        };
+    </script>
+</body>
+</html>
