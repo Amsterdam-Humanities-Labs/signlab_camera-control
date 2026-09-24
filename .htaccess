@@ -1,0 +1,3 @@
+# logs/ holds the server-side debug and capture logs that fx30debuglog.php and
+# fx30capturelog.php write. They are for the operator's admin, never for the web.
+RedirectMatch 403 /logs/
